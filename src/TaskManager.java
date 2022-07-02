@@ -130,7 +130,11 @@ public class TaskManager {
 
     public void removeSubtaskById(int id) {
         if (getSubtasksByEpicId(allSubtasks.getOrDefault(id, null).getEpicId()) != null) {
+<<<<<<< HEAD
             getSubtasksByEpicId(allSubtasks.getOrDefault(id, null).getEpicId()).remove((Integer) id);
+=======
+            getSubtasksByEpicId(allSubtasks.get(id).getEpicId()).remove(id);
+>>>>>>> origin/main
             updateEpicStatus(allSubtasks.get(id).getEpicId());
             allSubtasks.remove(id);
         }
@@ -139,7 +143,11 @@ public class TaskManager {
     public void removeEpicById(int id) {
         if (allEpics.getOrDefault(id, null) != null) {
             if (getSubtasksByEpicId(allSubtasks.getOrDefault(id, null).getEpicId()) != null) {
+<<<<<<< HEAD
                 getSubtasksByEpicId(allSubtasks.get(id).getEpicId()).remove((Integer) id);
+=======
+                getSubtasksByEpicId(allSubtasks.get(id).getEpicId()).remove(id);
+>>>>>>> origin/main
             }
             allEpics.remove(id);
         }
