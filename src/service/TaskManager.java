@@ -32,6 +32,15 @@ public class TaskManager {
         return allEpics;
     }
 
+    public ArrayList<HashMap> getAllTypesOfTasks() {
+        ArrayList<HashMap> result = new ArrayList<>();
+
+        result.add(getAllTasks());
+        result.add(getAllSubtasks());
+        result.add(getAllEpics());
+        return result;
+    }
+
     public void clearAllTasks() {
         allTasks.clear();
     }
@@ -47,6 +56,12 @@ public class TaskManager {
     public void clearAllEpics() {
         allEpics.clear();
         allSubtasks.clear();
+    }
+
+    public void clearAllTypesOfTasks() {
+        allTasks.clear();
+        allSubtasks.clear();
+        allEpics.clear();
     }
 
     public Task getTaskById(int id) {
@@ -101,7 +116,8 @@ public class TaskManager {
 
     public void updateEpic(Epic epic) {
         if (allEpics.containsKey(epic.getId())) {
-            allEpics.put(epic.getId(), epic);
+            allEpics.get(epic.getId()).setName(epic.getName());
+            allEpics.get(epic.getId()).setDescription(epic.getDescription());
         }
     }
 
@@ -126,6 +142,8 @@ public class TaskManager {
             } else {
                 allEpics.get(id).setStatus(TaskStatus.DONE);
             }
+        } else {
+            allEpics.get(id).setStatus(TaskStatus.NEW);
         }
     }
 
