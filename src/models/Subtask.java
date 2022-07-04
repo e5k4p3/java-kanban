@@ -1,7 +1,5 @@
 package models;
 
-import service.TaskManager;
-
 import java.util.Objects;
 
 public class Subtask extends Task {
@@ -9,7 +7,6 @@ public class Subtask extends Task {
 
     public Subtask(String name, String description, TaskStatus status, int epicId) {
         super(name, description, status);
-        this.id = TaskManager.getNewId();
         this.epicId = epicId;
     }
 

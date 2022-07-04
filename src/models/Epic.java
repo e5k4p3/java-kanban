@@ -1,7 +1,5 @@
 package models;
 
-import service.TaskManager;
-
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -10,7 +8,6 @@ public class Epic extends Task {
 
     public Epic(String name, String description) {
         super(name, description, TaskStatus.NEW);
-        this.id = TaskManager.getNewId();
         this.listOfSubtasksId = new ArrayList<>();
     }
 
@@ -23,7 +20,7 @@ public class Epic extends Task {
     }
 
     public void addToListOfSubtasksId(int id) {
-        listOfSubtasksId.remove(id);
+        listOfSubtasksId.add(id);
     }
 
     public void removeFromListOfSubtasksId(int id) {
