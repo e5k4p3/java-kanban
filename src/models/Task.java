@@ -1,5 +1,7 @@
 package models;
 
+import service.TaskManager;
+
 import java.util.Objects;
 
 public class Task {
@@ -12,6 +14,7 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.id = TaskManager.getNewId();
     }
 
     public int getId() {
@@ -64,7 +67,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "models.Task{" +
+        return "Task{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

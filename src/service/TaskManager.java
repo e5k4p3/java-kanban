@@ -12,12 +12,16 @@ public class TaskManager {
     private final HashMap<Integer, Task> allTasks;
     private final HashMap<Integer, Subtask> allSubtasks;
     private final HashMap<Integer, Epic> allEpics;
-    private int id = 0;
+    private static int id = 1;
 
     public TaskManager() {
         this.allTasks = new HashMap<>();
         this.allSubtasks = new HashMap<>();
         this.allEpics = new HashMap<>();
+    }
+
+    public static int getNewId() {
+        return id++;
     }
 
     public HashMap<Integer, Task> getAllTasks() {
@@ -107,10 +111,10 @@ public class TaskManager {
         }
     }
 
-    public void updateSubtask(Subtask subtask) {
-        if (allSubtasks.containsKey(subtask.getId())) {
-            allSubtasks.put(subtask.getId(), subtask);
-            updateEpicStatus(subtask.getEpicId());
+    public void updateSubtask(Subtask subtask) { //Если среди эпиков нету того, который указан в сабтаске, то, по идее,
+        if (allSubtasks.containsKey(subtask.getId())) { // ничего не должно происходить, ибо сабтаска без эпика не
+            allSubtasks.put(subtask.getId(), subtask); // может существовать. Поэтому либо ничего не должно происходить,
+            updateEpicStatus(subtask.getEpicId()); // либо должен создаваться обычный Task без epicId.
         }
     }
 
