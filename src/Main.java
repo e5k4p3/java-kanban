@@ -36,9 +36,6 @@ public class Main {
         for (Integer id : taskManager.getAllTasks().keySet()) {
             System.out.println(taskManager.getTaskById(id).toString());
         }
-        for (Integer id : taskManager.getAllTasks().keySet()) {
-            System.out.println(taskManager.getTaskById(id).toString());
-        }
         System.out.println("-----------------------------------------------------------------");
 
         Epic epic1 = new Epic("Первый эпик", "Описание первого эрика");
@@ -78,7 +75,7 @@ public class Main {
         subtask4.setStatus(IN_PROGRESS);
         taskManager.updateSubtask(subtask4);
         taskManager.removeSubtaskById(subtask1.getId());
-        taskManager.removeTaskById(213); // Проверка на NullPointerException
+        taskManager.removeSubtaskById(213); // Проверка на NullPointerException
         epic3.setName("Новый третий эпик");
         Subtask subtask7 = new Subtask("Седьмая сабтаска", "Описание седьмой сабтаски",
                 DONE, epic3.getId());
@@ -86,6 +83,7 @@ public class Main {
                 IN_PROGRESS, epic3.getId());
         taskManager.addSubtask(subtask7);
         taskManager.addSubtask(subtask8);
+        epic3.setStatus(NEW); // Проверка на ручное изменение статуса эпика
         epic3.setDescription("Новое описание третьего эпика");
         System.out.println("Проверка обновленных эпиков и сабтасков");
         System.out.println("-----------------------------------------------------------------");
@@ -97,6 +95,7 @@ public class Main {
         }
         System.out.println("-----------------------------------------------------------------");
         taskManager.removeEpicById(epic1.getId());
+        taskManager.removeEpicById(345); // Проверка на NullPointerException
         System.out.println("Проверка удаления эпика и добавления элементов в эпик");
         System.out.println("-----------------------------------------------------------------");
         for (Integer id : taskManager.getAllEpics().keySet()) {
