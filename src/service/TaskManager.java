@@ -91,10 +91,10 @@ public class TaskManager {
         }
     }
 
-    public void updateSubtask(Subtask subtask) { //Если среди эпиков нету того, который указан в сабтаске, то, по идее,
-        if (allSubtasks.containsKey(subtask.getId())) { // ничего не должно происходить, ибо сабтаска без эпика не
-            allSubtasks.put(subtask.getId(), subtask); // может существовать. Поэтому либо ничего не должно происходить,
-            allEpics.get(subtask.getEpicId()).updateStatus(); // либо должен создаваться обычный Task без epicId.
+    public void updateSubtask(Subtask subtask) {
+        if (allSubtasks.containsKey(subtask.getId())) {
+            allSubtasks.put(subtask.getId(), subtask);
+            allEpics.get(subtask.getEpicId()).updateStatus();
         }
     }
 
@@ -121,10 +121,14 @@ public class TaskManager {
         }
     }
 
+    public HashMap<Integer, Subtask> getSubtasksByEpicId (int id) {
+        return allEpics.get(id).getListOfSubtasks();
+    }
+
     public void removeEpicById(int id) {
         if (allEpics.containsKey(id)) {
             if (allEpics.get(id).getListOfSubtasks() != null) {
-                ArrayList<Integer> subtasksIdToRemove = new ArrayList<>(allEpics.get(id).getListOfSubtasks().keySet());
+                ArrayList<Integer> subtasksIdToRemove = new ArrayList<>(getSubtasksByEpicId(id).keySet());
                 for (Integer index : subtasksIdToRemove) {
                     removeSubtaskById(index);
                 }

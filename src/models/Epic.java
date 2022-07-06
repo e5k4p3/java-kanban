@@ -6,7 +6,7 @@ import java.util.Objects;
 import static models.TaskStatus.*;
 
 public class Epic extends Task {
-    protected HashMap<Integer, Subtask> listOfSubtasks;
+    private HashMap<Integer, Subtask> listOfSubtasks;
 
     public Epic(String name, String description) {
         super(name, description, TaskStatus.NEW);
