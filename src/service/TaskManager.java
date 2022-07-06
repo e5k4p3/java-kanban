@@ -4,8 +4,6 @@ import models.Epic;
 import models.Subtask;
 import models.Task;
 
-
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TaskManager {
@@ -128,9 +126,8 @@ public class TaskManager {
     public void removeEpicById(int id) {
         if (allEpics.containsKey(id)) {
             if (allEpics.get(id).getListOfSubtasks() != null) {
-                ArrayList<Integer> subtasksIdToRemove = new ArrayList<>(getSubtasksByEpicId(id).keySet());
-                for (Integer index : subtasksIdToRemove) {
-                    removeSubtaskById(index);
+                for (Integer index : getSubtasksByEpicId(id).keySet()) {
+                    allSubtasks.remove(index);
                 }
             }
             allEpics.remove(id);
