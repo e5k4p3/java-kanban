@@ -118,6 +118,7 @@ public class Main {
         }
         System.out.println("-----------------------------------------------------------------");
         System.out.println("Финальная проверка истории");
+        System.out.println("-----------------------------------------------------------------");
         for (Task task : taskManager.getHistory()) {
             System.out.println(task);
         }
