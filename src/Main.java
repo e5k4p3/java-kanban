@@ -1,7 +1,8 @@
+import interfaces.TaskManager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
-import service.TaskManager;
+import service.Managers;
 
 import static models.TaskStatus.*;
 
@@ -9,7 +10,7 @@ import static models.TaskStatus.*;
 public class Main {
 
     public static void main(String[] args) {
-        TaskManager taskManager = new TaskManager();
+        TaskManager taskManager = Managers.getDefault();
         Task task1 = new Task("Первая таска", "Описание первой таски", NEW);
         Task task2 = new Task("Вторая таска", "Описание второй таски", NEW);
         Task task3 = new Task("Третья таска", "Описание третьей таски", NEW);
@@ -22,6 +23,12 @@ public class Main {
         System.out.println("-----------------------------------------------------------------");
         for (Integer id : taskManager.getAllTasks().keySet()) {
             System.out.println(taskManager.getTaskById(id).toString());
+        }
+        System.out.println("-----------------------------------------------------------------");
+        System.out.println("Проверка истории c обычными тасками");
+        System.out.println("-----------------------------------------------------------------");
+        for (Task task : taskManager.getHistory()) {
+            System.out.println(task);
         }
         System.out.println("-----------------------------------------------------------------");
         task3.setName("Обновленная третья таска");
@@ -71,6 +78,12 @@ public class Main {
             System.out.println(taskManager.getSubtaskById(id));
         }
         System.out.println("-----------------------------------------------------------------");
+        System.out.println("Проверка истории с эпиками и сабтасками");
+        System.out.println("-----------------------------------------------------------------");
+        for (Task task : taskManager.getHistory()) {
+            System.out.println(task);
+        }
+        System.out.println("-----------------------------------------------------------------");
         subtask4.setStatus(IN_PROGRESS);
         taskManager.updateSubtask(subtask4);
         taskManager.removeSubtaskById(subtask1.getId());
@@ -102,6 +115,11 @@ public class Main {
         }
         for (Integer id : taskManager.getAllSubtasks().keySet()) {
             System.out.println(taskManager.getSubtaskById(id));
+        }
+        System.out.println("-----------------------------------------------------------------");
+        System.out.println("Финальная проверка истории");
+        for (Task task : taskManager.getHistory()) {
+            System.out.println(task);
         }
         System.out.println("-----------------------------------------------------------------");
     }
