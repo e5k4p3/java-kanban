@@ -3,15 +3,15 @@ package service;
 import interfaces.HistoryManager;
 import models.Task;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    List<Task> tasksInHistory;
+    private final LinkedList<Task> tasksInHistory;
 
     public InMemoryHistoryManager() {
-        tasksInHistory = new ArrayList<>();
+        tasksInHistory = new LinkedList<>();
     }
 
     @Override
@@ -24,7 +24,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (tasksInHistory.size() < 10) {
             tasksInHistory.add(task);
         } else {
-            tasksInHistory.remove(0);
+            tasksInHistory.removeFirst();
             tasksInHistory.add(task);
         }
     }

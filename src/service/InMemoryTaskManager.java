@@ -89,11 +89,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addTask(Task task) {
+        task.setId(getNewId());
         allTasks.put(task.getId(), task);
     }
 
     @Override
     public void addSubtask(Subtask subtask) {
+        subtask.setId(getNewId());
         allSubtasks.put(subtask.getId(), subtask);
         allEpics.get(subtask.getEpicId()).addToListOfSubtasks(subtask);
         allEpics.get(subtask.getEpicId()).updateStatus();
@@ -101,6 +103,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void addEpic(Epic epic) {
+        epic.setId(getNewId());
         allEpics.put(epic.getId(), epic);
     }
 

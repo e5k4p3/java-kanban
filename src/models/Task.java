@@ -14,8 +14,8 @@ public class Task {
         this.name = name;
         this.description = description;
         this.status = status;
-        this.id = InMemoryTaskManager.getNewId();
     }
+
 
     public int getId() {
         return id;

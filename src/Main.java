@@ -47,6 +47,9 @@ public class Main {
         Epic epic1 = new Epic("Первый эпик", "Описание первого эрика");
         Epic epic2 = new Epic("Второй эпик", "Описание второго эпика");
         Epic epic3 = new Epic("Третий эпик", "Описание третьего эпика");
+        taskManager.addEpic(epic1);
+        taskManager.addEpic(epic2);
+        taskManager.addEpic(epic3);
         Subtask subtask1 = new Subtask("Первая сабтаска", "Описание первой сабтаски",
                 NEW, epic1.getId());
         Subtask subtask2 = new Subtask("Вторая сабтаска", "Описание второй сабтаски",
@@ -59,10 +62,6 @@ public class Main {
                 DONE, epic2.getId());
         Subtask subtask6 = new Subtask("Шестая сабтаска", "Описание шестой сабтаски",
                 DONE, epic2.getId());
-
-        taskManager.addEpic(epic1);
-        taskManager.addEpic(epic2);
-        taskManager.addEpic(epic3);
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
         taskManager.addSubtask(subtask3);
