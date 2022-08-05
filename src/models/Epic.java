@@ -13,7 +13,6 @@ public class Epic extends Task {
         this.listOfSubtasks = new HashMap<>();
     }
 
-
     @Override
     public void setStatus(TaskStatus status) {
     }

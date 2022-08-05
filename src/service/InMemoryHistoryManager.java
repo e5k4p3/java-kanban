@@ -22,18 +22,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         return getTasks();
     }
 
-    private List<Task> getTasks() {
-        List<Task> tasksInHistoryList = new ArrayList<>();
-        Node<Task> curHead = head;
-
-        while (curHead != null) {
-            tasksInHistoryList.add(curHead.data);
-            curHead = curHead.next;
-        }
-
-        return tasksInHistoryList;
-    }
-
     @Override
     public void remove(int id) {
         if (tasksInHistory.containsKey(id)) {
@@ -85,6 +73,18 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             oldTail.next = newNode;
         }
+    }
+
+    private List<Task> getTasks() {
+        List<Task> tasksInHistoryList = new ArrayList<>();
+        Node<Task> curHead = head;
+
+        while (curHead != null) {
+            tasksInHistoryList.add(curHead.data);
+            curHead = curHead.next;
+        }
+
+        return tasksInHistoryList;
     }
 
     private static class Node<Task> {
