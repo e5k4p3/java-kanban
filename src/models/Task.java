@@ -1,16 +1,17 @@
 package models;
 
-import service.InMemoryTaskManager;
-
 import java.util.Objects;
 
 public class Task {
     protected int id;
+    protected TaskType type;
     protected String name;
     protected String description;
     protected TaskStatus status;
 
-    public Task(String name, String description, TaskStatus status) {
+    public Task(int id, TaskType type, String name, String description, TaskStatus status) {
+        this.id = id;
+        this.type = type;
         this.name = name;
         this.description = description;
         this.status = status;
@@ -23,6 +24,10 @@ public class Task {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public TaskType getType() {
+        return type;
     }
 
     public String getName() {
@@ -69,6 +74,7 @@ public class Task {
     public String toString() {
         return "Task{" +
                 "id=" + id +
+                ", type=" + type + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +

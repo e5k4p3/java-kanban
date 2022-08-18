@@ -8,8 +8,8 @@ import static models.TaskStatus.*;
 public class Epic extends Task {
     private HashMap<Integer, Subtask> listOfSubtasks;
 
-    public Epic(String name, String description) {
-        super(name, description, TaskStatus.NEW);
+    public Epic(int id, TaskType type, String name, String description) {
+        super(id, type, name, description, TaskStatus.NEW);
         this.listOfSubtasks = new HashMap<>();
     }
 
@@ -79,6 +79,7 @@ public class Epic extends Task {
     public String toString() {
         return "Epic{" +
                 "id=" + id +
+                ", type=" + type + '\'' +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
