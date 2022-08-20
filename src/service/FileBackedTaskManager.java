@@ -11,7 +11,7 @@ import java.util.*;
 import static models.TaskStatus.*;
 import static models.TaskType.*;
 
-public class FileBackedTaskManager extends InMemoryTaskManager implements TaskManager {
+public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
 
     public FileBackedTaskManager(File file) {
@@ -63,27 +63,35 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
     }
 
     public void loadFromFile() {
-        final List<String> taskData = getSaveData(file).get("Tasks");
-        final List<String> historyData = getSaveData(file).get("History");
+        final Map<String, List<String>> allData = getSaveData(file);
+        final List<String> taskData = allData.get("Tasks");
+        final List<String> historyData = allData.get("History");
+        Map<Integer, Task> allTypesOfTasks;
 
+        if (taskData.isEmpty() && historyData.isEmpty()) {
+            return;
+        }
+        // Спасибо большое за putIfAbsent()! Мне как раз в своем проекте это нужно было, а то везде использовал contains() :D
         for (String line : taskData) {
             final Task task = getTaskFromString(line);
 
-            if (task.getType() == TASK && !getAllTaskTreeMap().containsValue(task)) {
-                super.addTask(getTaskFromString(line));
-            } else if (task.getType() == EPIC && !getAllTaskTreeMap().containsValue(task)) {
-                super.addEpic((Epic) getTaskFromString(line));
-            } else if (task.getType() == SUBTASK && !getAllTaskTreeMap().containsValue(task)) {
-                super.addSubtask((Subtask) getTaskFromString(line));
+            if (task.getType() == TASK) {
+                super.addTask(task);
+            } else if (task.getType() == EPIC) {
+                super.addEpic((Epic) task);
+            } else if (task.getType() == SUBTASK) {
+                super.addSubtask((Subtask) task);
             }
         }
+        // У меня пока больше нету идей, как узнать тип таски, зная только id
+        allTypesOfTasks = getAllTaskTreeMap();
         for (String line : historyData) {
             final int id = Integer.parseInt(line);
-            if (getAllTaskTreeMap().get(id).getType() == TASK) {
+            if (allTypesOfTasks.get(id).getType() == TASK) {
                 super.getTaskById(id);
-            } else if (getAllTaskTreeMap().get(id).getType() == EPIC) {
+            } else if (allTypesOfTasks.get(id).getType() == EPIC) {
                 super.getEpicById(id);
-            } else if (getAllTaskTreeMap().get(id).getType() == SUBTASK) {
+            } else if (allTypesOfTasks.get(id).getType() == SUBTASK) {
                 super.getSubtaskById(id);
             }
         }
@@ -139,21 +147,26 @@ public class FileBackedTaskManager extends InMemoryTaskManager implements TaskMa
         try (BufferedReader fileReader = new BufferedReader(new FileReader(file))) {
             final Map<String, List<String>> allData = new HashMap<>();
             final List<String> taskData = new ArrayList<>();
-            final List<String> historyData;
+            List<String> historyData = new ArrayList<>();
 
-            fileReader.readLine();
-            while (fileReader.ready()) {
-                String line = fileReader.readLine();
-                if (!line.isEmpty() || !line.isBlank()) {
-                    taskData.add(line);
-                } else {
-                    break;
+            if (fileReader.readLine() != null) {
+                while (fileReader.ready()) {
+                    String line = fileReader.readLine();
+                    if (!line.isEmpty() || !line.isBlank()) {
+                        taskData.add(line);
+                    } else {
+                        break;
+                    }
                 }
+                historyData = getHistoryData(fileReader.readLine());
+                allData.put("Tasks", taskData);
+                allData.put("History", historyData);
+                return allData;
+            } else {
+                allData.put("Tasks", taskData);
+                allData.put("History", historyData);
+                return allData;
             }
-            historyData = getHistoryData(fileReader.readLine());
-            allData.put("Tasks", taskData);
-            allData.put("History", historyData);
-            return allData;
         } catch (IOException e) {
             throw new ManagerLoadException("Произошла ошибка во время считывания файла.");
         }
