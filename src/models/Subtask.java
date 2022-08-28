@@ -1,12 +1,14 @@
 package models;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task {
     private int epicId;
 
-    public Subtask(int id, TaskType type, String name, String description, TaskStatus status, int epicId) {
-        super(id, type, name, description, status);
+    public Subtask(int id, TaskType type, String name, String description, TaskStatus status, int epicId,
+                   LocalDateTime startTime, Long duration) {
+        super(id, type, name, description, status, startTime, duration);
         this.epicId = epicId;
     }
 
@@ -40,6 +42,8 @@ public class Subtask extends Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
+                ", startTime'" + startTime + '\'' +
+                ", duration'" + duration + '\'' +
                 ", epicId=" + epicId +
                 '}';
     }

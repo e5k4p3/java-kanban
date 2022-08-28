@@ -1,23 +1,70 @@
 package models;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 
 import static models.TaskStatus.*;
 
 public class Epic extends Task {
-    private HashMap<Integer, Subtask> listOfSubtasks;
+    private final HashMap<Integer, Subtask> listOfSubtasks;
 
     public Epic(int id, TaskType type, String name, String description) {
-        super(id, type, name, description, TaskStatus.NEW);
+        super(id, type, name, description, TaskStatus.NEW, LocalDateTime.of(9999, 1, 1, 0, 0), 0L);
         this.listOfSubtasks = new HashMap<>();
     }
 
     @Override
-    public void setStatus(TaskStatus status) {
+    public void setStatus(TaskStatus status) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("У Epic-ов нельзя менять статус вручную!");
     }
 
-    public void updateStatus() {
+    @Override
+    public LocalDateTime getEndTime() {
+        LocalDateTime endTime = startTime.plus(duration);
+        if (listOfSubtasks.isEmpty()) {
+            return endTime;
+        } else {
+            for (Subtask subtask : listOfSubtasks.values()) {
+                if (endTime.isBefore(subtask.getEndTime())) {
+                    endTime = subtask.getEndTime();
+                }
+            }
+        }
+        return endTime;
+    }
+
+    @Override
+    public Duration getDuration() {
+        return Duration.between(startTime, getEndTime());
+    }
+
+    public HashMap<Integer, Subtask> getListOfSubtasks() {
+        return listOfSubtasks;
+    }
+
+    public void addToListOfSubtasks(Subtask subtask) {
+        duration = duration.plus(subtask.getDuration());
+        listOfSubtasks.put(subtask.getId(), subtask);
+        updateStatus();
+        updateStartTime();
+    }
+
+    public void removeFromListOfSubtasks(int id) {
+        duration = duration.minus(listOfSubtasks.get(id).getDuration());
+        listOfSubtasks.remove(id);
+        updateStatus();
+        updateStartTime();
+    }
+
+    public void clearListOfSubtasks() {
+        listOfSubtasks.clear();
+        updateStatus();
+        updateStartTime();
+    }
+
+    private void updateStatus() {
         int newStatus = 0;
         int doneStatus = 0;
 
@@ -41,24 +88,18 @@ public class Epic extends Task {
         }
     }
 
-    public HashMap<Integer, Subtask> getListOfSubtasks() {
-        return listOfSubtasks;
-    }
-
-    public void setListOfSubtasks(HashMap<Integer, Subtask> listOfSubtasks) {
-        this.listOfSubtasks = listOfSubtasks;
-    }
-
-    public void addToListOfSubtasks(Subtask subtask) {
-        listOfSubtasks.put(subtask.getId(), subtask);
-    }
-
-    public void removeFromListOfSubtasks(int id) {
-        listOfSubtasks.remove(id);
-    }
-
-    public void clearListOfSubtasks() {
-        listOfSubtasks.clear();
+    private void updateStartTime() {
+        if (listOfSubtasks.isEmpty()) {
+            startTime = LocalDateTime.of(9999, 1, 1, 0, 0);
+            return;
+        }
+        for (Subtask subtask : listOfSubtasks.values()) {
+            if (startTime.equals(LocalDateTime.of(9999, 1, 1, 0, 0))) {
+                startTime = subtask.getStartTime();
+            } else if (startTime.isAfter(subtask.getStartTime())) {
+                startTime = subtask.getStartTime();
+            }
+        }
     }
 
     @Override
@@ -83,6 +124,8 @@ public class Epic extends Task {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
+                ", startTime'" + startTime + '\'' +
+                ", duration'" + duration + '\'' +
                 ", listOfSubtasks=" + listOfSubtasks +
                 '}';
     }

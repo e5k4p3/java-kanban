@@ -1,17 +1,19 @@
 package service;
 
 import interfaces.HistoryManager;
-import interfaces.TaskManager;
 import models.*;
 import service.exceptions.*;
 
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static models.TaskStatus.*;
 import static models.TaskType.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
+    public static final DateTimeFormatter LOCAL_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
     private final File file;
 
     public FileBackedTaskManager(File file) {
@@ -20,18 +22,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static void main(String[] args) {
         FileBackedTaskManager taskManager = new FileBackedTaskManager(new File("src/resources/save.csv"));
-        Task task1 = new Task(getNewId(), TASK, "Первая таска", "Описание первой таски", NEW);
-        Task task2 = new Task(getNewId(), TASK, "Вторая таска", "Описание второй таски", NEW);
+        Task task1 = new Task(getNewId(), TASK, "Первая таска", "Описание первой таски", NEW,
+                LocalDateTime.parse("09:10 11.07.1995", LOCAL_DATE_TIME_FORMATTER), 30L);
+        Task task2 = new Task(getNewId(), TASK, "Вторая таска", "Описание второй таски", NEW,
+                LocalDateTime.parse("09:20 11.07.1995", LOCAL_DATE_TIME_FORMATTER), 40L);
         taskManager.addTask(task1);
         taskManager.addTask(task2);
         Epic epic1 = new Epic(getNewId(), EPIC, "Первый эпик", "Описание первого эпика");
         taskManager.addEpic(epic1);
         Subtask subtask1 = new Subtask(getNewId(), SUBTASK, "Первая сабтаска", "Описание первой сабтаски",
-                NEW, epic1.getId());
+                NEW, epic1.getId(), LocalDateTime.parse("18:20 11.07.1995", LOCAL_DATE_TIME_FORMATTER), 30L);
         Subtask subtask2 = new Subtask(getNewId(), SUBTASK, "Вторая сабтаска", "Описание второй сабтаски",
-                IN_PROGRESS, epic1.getId());
+                IN_PROGRESS, epic1.getId(), LocalDateTime.parse("19:20 11.07.1995", LOCAL_DATE_TIME_FORMATTER), 10L);
         Subtask subtask3 = new Subtask(getNewId(), SUBTASK, "Третья сабтаска", "Описание третьей сабтаски",
-                DONE, epic1.getId());
+                DONE, epic1.getId(), LocalDateTime.parse("20:20 11.07.1995", LOCAL_DATE_TIME_FORMATTER), 15L);
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
         taskManager.addSubtask(subtask3);
@@ -48,7 +52,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         taskManager.getEpicById(epic1.getId());
         taskManager.getSubtaskById(subtask1.getId());
 
-        FileBackedTaskManager newTaskManager = new FileBackedTaskManager(new File("src/resources/save.csv"));
+        FileBackedTaskManager newTaskManager = Managers.getDefaultFileBacked(new File("src/resources/save.csv"));
         newTaskManager.loadFromFile();
         Map<Integer, Task> allTasksMap = newTaskManager.getAllTaskTreeMap();
         for (Task task : allTasksMap.values()) {
@@ -60,6 +64,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             System.out.println(task);
         }
         System.out.println("-----------------------------------------------------------------");
+        for (Task task : taskManager.getPrioritizedTasks()) {
+            System.out.println(task);
+        }
     }
 
     public void loadFromFile() {
@@ -68,10 +75,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         final List<String> historyData = allData.get("History");
         Map<Integer, Task> allTypesOfTasks;
 
-        if (taskData.isEmpty() && historyData.isEmpty()) {
+        if (taskData.isEmpty()) {
             return;
         }
-        // Спасибо большое за putIfAbsent()! Мне как раз в своем проекте это нужно было, а то везде использовал contains() :D
         for (String line : taskData) {
             final Task task = getTaskFromString(line);
 
@@ -83,7 +89,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 super.addSubtask((Subtask) task);
             }
         }
-        // У меня пока больше нету идей, как узнать тип таски, зная только id
+        if (historyData.isEmpty()) {
+            return;
+        }
         allTypesOfTasks = getAllTaskTreeMap();
         for (String line : historyData) {
             final int id = Integer.parseInt(line);
@@ -97,20 +105,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    public Map<Integer, Task> getAllTaskTreeMap() {
-        final Map<Integer, Task> sortedAllTasks = new TreeMap<>();
-
-        sortedAllTasks.putAll(getAllTasks());
-        sortedAllTasks.putAll(getAllEpics());
-        sortedAllTasks.putAll(getAllSubtasks());
-        return sortedAllTasks;
-    }
-
     private void save() {
         try (Writer fileWriter = new FileWriter(file)) {
             final Map<Integer, Task> tasksToSave = getAllTaskTreeMap();
 
-            fileWriter.write("id,type,name,status,description,epic\n");
+            fileWriter.write("id,type,name,status,description,start,duration,epic\n");
             for (Task task : tasksToSave.values()) {
                 fileWriter.write(convertTaskToString(task));
             }
@@ -126,12 +125,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         final String name = task.getName();
         final TaskStatus status = task.getStatus();
         final String description = task.getDescription();
+        final String start = task.getStartTime().format(LOCAL_DATE_TIME_FORMATTER);
+        final Long duration = task.getDuration().toMinutes();
 
-        if (task.getType() != SUBTASK) {
-            return String.format("%s,%s,%s,%s,%s,\n", id, type, name, status, description);
-        } else {
-            int epicId = ((Subtask) task).getEpicId();
-            return String.format("%s,%s,%s,%s,%s,%s\n", id, type, name, status, description, epicId);
+        switch (task.getType()) {
+            case TASK:
+                return String.format("%s,%s,%s,%s,%s,%s,%s,\n", id, type, name, status, description, start, duration);
+            case SUBTASK:
+                int epicId = ((Subtask) task).getEpicId();
+                return String.format("%s,%s,%s,%s,%s,%s,%s,%s,\n",
+                        id, type, name, status, description, start, duration, epicId);
+            case EPIC:
+                return String.format("%s,%s,%s,%s,%s,%s,%s\n", id, type, name, status, description, start, duration);
+            default:
+                return null;
         }
     }
 
@@ -189,7 +196,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 final String name = values[2];
                 final TaskStatus status = TaskStatus.valueOf(values[3]);
                 final String description = values[4];
-                return new Task(id, type, name, description, status);
+                final LocalDateTime start = LocalDateTime.parse(values[5], LOCAL_DATE_TIME_FORMATTER);
+                final Long duration = Long.parseLong(values[6]);
+                return new Task(id, type, name, description, status, start, duration);
             }
             case "EPIC": {
                 final int id = Integer.parseInt(values[0]);
@@ -204,8 +213,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 final String name = values[2];
                 final TaskStatus status = TaskStatus.valueOf(values[3]);
                 final String description = values[4];
-                final int epicId = Integer.parseInt(values[5]);
-                return new Subtask(id, type, name, description, status, epicId);
+                final LocalDateTime start = LocalDateTime.parse(values[5], LOCAL_DATE_TIME_FORMATTER);
+                final Long duration = Long.parseLong(values[6]);
+                final int epicId = Integer.parseInt(values[7]);
+                return new Subtask(id, type, name, description, status, epicId, start, duration);
             }
         }
         return null;
