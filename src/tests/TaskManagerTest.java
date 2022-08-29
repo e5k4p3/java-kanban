@@ -8,9 +8,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.FileBackedTaskManager;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static models.TaskType.*;
 import static models.TaskStatus.*;
@@ -41,7 +44,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
                 NEW, 2, LocalDateTime.parse("12:34 28.08.2022", formatter), 10L);
         subtask2 = new Subtask(4, SUBTASK, "Вторая сабтаска", "Описание второй сабтаски",
                 NEW, 2, LocalDateTime.parse("12:45 28.08.2022", formatter), 10L);
-        subtask3 = new Subtask(5, SUBTASK, "Первая сабтаска", "Описание первой сабтаски",
+        subtask3 = new Subtask(5, SUBTASK, "Третья сабтаска", "Описание третьей сабтаски",
                 NEW, 2, LocalDateTime.parse("12:56 28.08.2022", formatter), 10L);
         testTasks.put(task.getId(), task);
         testEpics.put(epic.getId(), epic);
@@ -51,7 +54,7 @@ abstract class TaskManagerTest <T extends TaskManager> {
     }
 
     @Test
-    public void getAllTasks() {
+    public void getAllTasks() { // Решил использовать названия методов из TaskManager, чтобы не запутаться
         taskManager.addTask(task);
         assertEquals(testTasks, taskManager.getAllTasks());
     }
@@ -235,25 +238,93 @@ abstract class TaskManagerTest <T extends TaskManager> {
         taskManager.addEpic(epic);
         assertEquals(epic, taskManager.getEpicById(epic.getId()));
         taskManager.updateEpic(updatedEpic);
-        assertNotEquals(epic, taskManager.getEpicById(epic.getId()));
         assertEquals(updatedEpic, taskManager.getEpicById(epic.getId()));
         assertEquals("Обновленный эпик", taskManager.getEpicById(epic.getId()).getName());
         assertDoesNotThrow(() -> taskManager.updateEpic(null));
     }
 
     @Test
-    public void removeTaskById() {}
+    public void removeTaskById() {
+        taskManager.addTask(task);
+        assertEquals(testTasks, taskManager.getAllTasks());
+        taskManager.removeTaskById(task.getId());
+        assertNotEquals(testTasks, taskManager.getAllTasks());
+        assertTrue(taskManager.getAllTasks().isEmpty());
+    }
 
     @Test
-    public void removeSubtaskById() {}
+    public void removeSubtaskById() {
+        taskManager.addEpic(epic);
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+        taskManager.addSubtask(subtask3);
+        assertEquals(testSubtasks, taskManager.getAllSubtasks());
+        assertEquals(epic.getStartTime(), subtask1.getStartTime());
+        assertEquals(epic.getEndTime(), subtask3.getEndTime());
+        assertEquals(epic.getDuration(), Duration.between(subtask1.getStartTime(), subtask3.getEndTime()));
+        testSubtasks.remove(4);
+        taskManager.removeSubtaskById(subtask2.getId());
+        assertEquals(testSubtasks, taskManager.getAllSubtasks());
+        assertEquals(epic.getDuration(), Duration.between(subtask1.getStartTime(), subtask3.getEndTime()));
+        testSubtasks.remove(5);
+        taskManager.removeSubtaskById(subtask3.getId());
+        assertEquals(testSubtasks, taskManager.getAllSubtasks());
+        assertEquals(epic.getStartTime(), subtask1.getStartTime());
+        assertEquals(epic.getDuration(), subtask1.getDuration());
+        assertEquals(epic.getEndTime(), subtask1.getEndTime());
+    }
 
     @Test
-    public void removeEpicById() {}
+    public void removeEpicById() {
+        taskManager.addEpic(epic);
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+        taskManager.addSubtask(subtask3);
+        assertEquals(testEpics, taskManager.getAllEpics());
+        assertEquals(testSubtasks, taskManager.getAllSubtasks());
+        taskManager.removeEpicById(epic.getId());
+        assertTrue(taskManager.getAllEpics().isEmpty());
+        assertTrue(taskManager.getAllSubtasks().isEmpty());
+    }
 
     @Test
-    public void getHistory() {}
+    public void getHistory() {
+        List<Task> testHistory = new ArrayList<>();
+        testHistory.add(task);
+        testHistory.add(subtask1);
+        testHistory.add(epic);
+        taskManager.addTask(task);
+        taskManager.addEpic(epic);
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+        assertNotEquals(testHistory, taskManager.getHistory());
+        taskManager.getTaskById(task.getId());
+        taskManager.getEpicById(epic.getId());
+        taskManager.getSubtaskById(subtask1.getId());
+        assertNotEquals(testHistory, taskManager.getHistory());
+        taskManager.getTaskById(task.getId());
+        taskManager.getSubtaskById(subtask1.getId());
+        taskManager.getEpicById(epic.getId());
+        assertEquals(testHistory, taskManager.getHistory());
+    }
 
     @Test
-    public void getPrioritizedTasks() {}
+    public void getPrioritizedTasks() {
+        List<Task> testPrio = new ArrayList<>();
+        Task newTask = new Task(6, TASK, "Новая таска", "Описание новой таски", NEW,
+                LocalDateTime.parse("10:03 28.08.2022", formatter), 30L);
+        testPrio.add(newTask);
+        testPrio.add(task);
+        testPrio.addAll(testEpics.values());
+        testPrio.addAll(testSubtasks.values());
+        assertTrue(taskManager.getPrioritizedTasks().isEmpty());
+        taskManager.addTask(task);
+        taskManager.addEpic(epic);
+        taskManager.addSubtask(subtask1);
+        taskManager.addSubtask(subtask2);
+        taskManager.addSubtask(subtask3);
+        taskManager.addTask(newTask);
+        assertEquals(testPrio, new ArrayList<>(taskManager.getPrioritizedTasks()));
+    }
 
 }

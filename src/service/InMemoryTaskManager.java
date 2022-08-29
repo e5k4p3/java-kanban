@@ -10,6 +10,8 @@ import service.exceptions.TaskValidationException;
 
 import java.util.*;
 
+import static models.TaskType.*;
+
 public class InMemoryTaskManager implements TaskManager {
     private static int id = 1;
     private final HashMap<Integer, Task> allTasks;
@@ -150,9 +152,11 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void updateEpic(Epic epic) {
-        if (allEpics.containsKey(epic.getId())) {
-            allEpics.get(epic.getId()).setName(epic.getName());
-            allEpics.get(epic.getId()).setDescription(epic.getDescription());
+        if (epic != null) {
+            if (allEpics.containsKey(epic.getId())) {
+                allEpics.get(epic.getId()).setName(epic.getName());
+                allEpics.get(epic.getId()).setDescription(epic.getDescription());
+            }
         }
     }
 
@@ -196,11 +200,19 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Set<Task> getPrioritizedTasks() {
-        final TreeSet<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
+        final Set<Task> prioritizedTasks = new TreeSet<>((t1, t2) -> {
+            if (t1.getStartTime().equals(t2.getStartTime()) && t2.getType() == EPIC) {
+                return 1;
+            } else if (t1.getStartTime().isBefore(t2.getStartTime())) {
+                return -1;
+            } else if (t1.getStartTime().isAfter(t2.getStartTime())) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
 
-        for(Task task : getAllTaskTreeMap().values()) {
-            prioritizedTasks.add(task);
-        }
+        prioritizedTasks.addAll(getAllTaskTreeMap().values());
         return prioritizedTasks;
     }
 
