@@ -2,7 +2,8 @@ package service;
 
 import interfaces.HistoryManager;
 import models.*;
-import service.exceptions.*;
+import service.exceptions.ManagerLoadException;
+import service.exceptions.ManagerSaveException;
 
 import java.io.*;
 import java.time.LocalDateTime;
@@ -15,13 +16,12 @@ import static models.TaskType.*;
 public class FileBackedTaskManager extends InMemoryTaskManager {
     public static final DateTimeFormatter LOCAL_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd.MM.yyyy");
     private final File file;
-
     public FileBackedTaskManager(File file) {
         this.file = file;
     }
 
     public static void main(String[] args) {
-        FileBackedTaskManager taskManager = new FileBackedTaskManager(new File("src/resources/save.csv"));
+        FileBackedTaskManager taskManager = new FileBackedTaskManager(new File("src/main/java/resources/save.csv"));
         Task task1 = new Task(getNewId(), TASK, "Первая таска", "Описание первой таски", NEW,
                 LocalDateTime.parse("09:10 11.07.1995", LOCAL_DATE_TIME_FORMATTER), 30L);
         Task task2 = new Task(getNewId(), TASK, "Вторая таска", "Описание второй таски", NEW,
@@ -52,7 +52,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         taskManager.getEpicById(epic1.getId());
         taskManager.getSubtaskById(subtask1.getId());
 
-        FileBackedTaskManager newTaskManager = Managers.getDefaultFileBacked(new File("src/resources/save.csv"));
+        FileBackedTaskManager newTaskManager = Managers.getDefaultFileBacked(new File("src/main/java/resources/save.csv"));
         newTaskManager.loadFromFile();
         Map<Integer, Task> allTasksMap = newTaskManager.getAllTaskTreeMap();
         for (Task task : allTasksMap.values()) {
@@ -189,8 +189,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private Task getTaskFromString(String line) {
         final String[] values = line.split(",");
-        switch (values[1]) {
-            case "TASK": {
+        switch (TaskType.valueOf(values[1])) {
+            case TASK: {
                 final int id = Integer.parseInt(values[0]);
                 final TaskType type = TaskType.valueOf(values[1]);
                 final String name = values[2];
@@ -200,14 +200,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 final Long duration = Long.parseLong(values[6]);
                 return new Task(id, type, name, description, status, start, duration);
             }
-            case "EPIC": {
+            case EPIC: {
                 final int id = Integer.parseInt(values[0]);
                 final TaskType type = TaskType.valueOf(values[1]);
                 final String name = values[2];
                 final String description = values[4];
                 return new Epic(id, type, name, description);
             }
-            case "SUBTASK": {
+            case SUBTASK: {
                 final int id = Integer.parseInt(values[0]);
                 final TaskType type = TaskType.valueOf(values[1]);
                 final String name = values[2];

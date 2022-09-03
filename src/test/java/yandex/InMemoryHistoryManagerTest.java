@@ -1,4 +1,4 @@
-package tests;
+package yandex;
 
 import interfaces.HistoryManager;
 import models.Epic;
@@ -15,9 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static models.TaskStatus.NEW;
-import static models.TaskType.*;
-import static models.TaskType.SUBTASK;
 import static org.junit.jupiter.api.Assertions.*;
+import static models.TaskType.*;
 
 class InMemoryHistoryManagerTest {
     protected Task task;

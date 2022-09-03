@@ -1,4 +1,4 @@
-package tests;
+package yandex;
 
 import interfaces.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     protected File file;
     @BeforeEach
     public void beforeEachFileBacked() {
-        file = new File("src/tests/save_test.csv");
+        file = new File("java/yandex/save_test.csv");
         taskManager = Managers.getDefaultFileBacked(file);
         super.beforeEach();
     }
@@ -37,7 +37,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         taskManager.getSubtaskById(subtask3.getId());
         try {
             List<String> testSave = Files.readAllLines(Paths.get(String.valueOf(file)));
-            List<String> exampleSave = Files.readAllLines(Paths.get("src/tests/save_example.csv"));
+            List<String> exampleSave = Files.readAllLines(Paths.get("java/yandex/save_example.csv"));
             assertEquals(exampleSave, testSave);
         } catch (IOException e) {
             e.printStackTrace();

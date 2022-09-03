@@ -1,16 +1,16 @@
-package tests;
+package yandex;
 
-import models.*;
-
+import models.Epic;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.FileBackedTaskManager;
 
+import models.Subtask;
+import service.FileBackedTaskManager;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static models.TaskType.*;
 import static models.TaskStatus.*;
+import static models.TaskType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class EpicTest {

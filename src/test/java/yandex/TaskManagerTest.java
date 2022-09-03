@@ -1,4 +1,4 @@
-package tests;
+package yandex;
 
 import interfaces.TaskManager;
 import models.Epic;
@@ -15,9 +15,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static models.TaskType.*;
 import static models.TaskStatus.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 abstract class TaskManagerTest <T extends TaskManager> {
     protected T taskManager;
