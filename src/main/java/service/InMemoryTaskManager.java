@@ -10,19 +10,20 @@ import service.exceptions.SubtaskWithoutEpicException;
 
 import java.util.*;
 
-import static models.TaskType.*;
 
 public class InMemoryTaskManager implements TaskManager {
     private static int id = 1;
     private final HashMap<Integer, Task> allTasks;
     private final HashMap<Integer, Subtask> allSubtasks;
     private final HashMap<Integer, Epic> allEpics;
+    private final TreeSet<Task> allTasksSortedByStartTime;
     protected final HistoryManager historyManager;
 
     public InMemoryTaskManager() {
         this.allTasks = new HashMap<>();
         this.allSubtasks = new HashMap<>();
         this.allEpics = new HashMap<>();
+        this.allTasksSortedByStartTime = new TreeSet<>(Comparator.comparing(Task::getStartTime));
         this.historyManager = Managers.getDefaultHistory();
     }
 
@@ -94,6 +95,7 @@ public class InMemoryTaskManager implements TaskManager {
         try {
             if (validateTask(task)) {
                 allTasks.putIfAbsent(task.getId(), task);
+                allTasksSortedByStartTime.add(task);
             }
         } catch (TaskValidationException e) {
             System.out.println(e.getMessage());
@@ -107,6 +109,7 @@ public class InMemoryTaskManager implements TaskManager {
                 if (allEpics.containsKey(subtask.getEpicId())) {
                     allSubtasks.putIfAbsent(subtask.getId(), subtask);
                     allEpics.get(subtask.getEpicId()).addToListOfSubtasks(subtask);
+                    allTasksSortedByStartTime.add(subtask);
                 } else {
                     throw new SubtaskWithoutEpicException("Попытка создать Subtask для Epic, которого нет");
                 }
@@ -163,6 +166,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeTaskById(int id) {
         if (allTasks.getOrDefault(id, null) != null) {
+            allTasksSortedByStartTime.remove(getTaskById(id));
             allTasks.remove(id);
             historyManager.remove(id);
         }
@@ -173,6 +177,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (allSubtasks.getOrDefault(id, null) != null) {
             if (allEpics.get(allSubtasks.get(id).getEpicId()).getListOfSubtasks().containsKey(id)) {
                 allEpics.get(allSubtasks.get(id).getEpicId()).removeFromListOfSubtasks(id);
+                allTasksSortedByStartTime.remove(getSubtaskById(id));
                 allSubtasks.remove(id);
                 historyManager.remove(id);
             }
@@ -200,20 +205,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Set<Task> getPrioritizedTasks() {
-        final Set<Task> prioritizedTasks = new TreeSet<>((t1, t2) -> {
-            if (t1.getStartTime().equals(t2.getStartTime()) && t2.getType() == EPIC) {
-                return 1;
-            } else if (t1.getStartTime().isBefore(t2.getStartTime())) {
-                return -1;
-            } else if (t1.getStartTime().isAfter(t2.getStartTime())) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-
-        prioritizedTasks.addAll(getAllTaskTreeMap().values());
-        return prioritizedTasks;
+        return allTasksSortedByStartTime;
     }
 
     protected Map<Integer, Task> getAllTaskTreeMap() {
@@ -227,7 +219,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected Boolean validateTask(Task task) throws TaskValidationException {
         if (task != null) {
-            for (Task sortedTask : getPrioritizedTasks()) {
+            for (Task sortedTask : allTasksSortedByStartTime) {
                 if (sortedTask.getStartTime().isBefore(task.getStartTime()) &&
                         sortedTask.getEndTime().isAfter(task.getStartTime())) {
                     throw new TaskValidationException(task.getName() + " заканчивается после начала " +

@@ -10,5 +10,4 @@ class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
         taskManager = (InMemoryTaskManager) Managers.getDefault();
         super.beforeEach();
     }
-
 }

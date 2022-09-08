@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import models.Subtask;
 import service.FileBackedTaskManager;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -66,6 +68,36 @@ class EpicTest {
         epic.addToListOfSubtasks(subtask1);
         epic.addToListOfSubtasks(subtask2);
         assertEquals(IN_PROGRESS, epic.getStatus());
+    }
+
+    @Test
+    public void shouldReturnStartTimeOfEarliestOfSubtasksInList() {
+        assertNotEquals(epic.getStartTime(), subtask1.getStartTime());
+        epic.addToListOfSubtasks(subtask1);
+        assertEquals(epic.getStartTime(), subtask1.getStartTime());
+        epic.addToListOfSubtasks(subtask2);
+        assertEquals(epic.getStartTime(), subtask1.getStartTime());
+    }
+
+    @Test
+    public void shouldReturnEndTimeOfLatestSubtaskInList() {
+        assertNotEquals(epic.getEndTime(), subtask1.getEndTime());
+        epic.addToListOfSubtasks(subtask1);
+        assertEquals(epic.getEndTime(), subtask1.getEndTime());
+        epic.addToListOfSubtasks(subtask2);
+        assertEquals(epic.getEndTime(), subtask2.getEndTime());
+    }
+
+    @Test
+    public void shouldReturnDurationBetweenEarliestSubtaskStartTimeAndLatestSubtaskEndTime() {
+        Subtask subtask3 = new Subtask(4, SUBTASK, "Третья сабтаска", "Описание третьей сабтаски",
+                NEW, 1, LocalDateTime.parse("13:46 28.08.2022", formatter), 20L);
+        epic.addToListOfSubtasks(subtask1);
+        epic.addToListOfSubtasks(subtask2);
+        epic.addToListOfSubtasks(subtask3);
+        assertEquals(epic.getDuration(), Duration.between(subtask1.getStartTime(),subtask3.getEndTime()));
+        epic.removeFromListOfSubtasks(subtask3.getId());
+        assertEquals(epic.getDuration(), Duration.between(subtask1.getStartTime(), subtask2.getEndTime()));
     }
 
 }
