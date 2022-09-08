@@ -17,7 +17,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Subtask> allSubtasks;
     private final HashMap<Integer, Epic> allEpics;
     private final TreeSet<Task> allTasksSortedByStartTime;
-    protected final HistoryManager historyManager;
+    protected final HistoryManager<Task> historyManager;
 
     public InMemoryTaskManager() {
         this.allTasks = new HashMap<>();

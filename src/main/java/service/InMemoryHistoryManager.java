@@ -7,18 +7,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class InMemoryHistoryManager implements HistoryManager {
+public class InMemoryHistoryManager<T extends Task> implements HistoryManager<T> {
 
-    private final HashMap<Integer, Node<Task>> tasksInHistory;
-    private Node<Task> head;
-    private Node<Task> tail;
+    private final HashMap<Integer, Node<T>> tasksInHistory;
+    private Node<T> head;
+    private Node<T> tail;
 
     public InMemoryHistoryManager() {
         tasksInHistory = new HashMap<>();
     }
 
     @Override
-    public List<Task> getHistory() {
+    public List<T> getHistory() {
         return getTasks();
     }
 
@@ -31,17 +31,17 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public void add(Task task) {
+    public void add(T task) {
         if (task != null) {
             remove(task.getId());
             linkLast(task);
         }
     }
 
-    private void removeNode(Node<Task> node) {
+    private void removeNode(Node<T> node) {
         if (node != null) {
-            final Node<Task> prev = node.prev;
-            final Node<Task> next = node.next;
+            final Node<T> prev = node.prev;
+            final Node<T> next = node.next;
 
             if (prev == null) {
                 head = next;
@@ -61,9 +61,9 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    private void linkLast(Task task) {
-        final Node<Task> oldTail = tail;
-        final Node<Task> newNode = new Node<>(task, oldTail, null);
+    private void linkLast(T task) {
+        final Node<T> oldTail = tail;
+        final Node<T> newNode = new Node<>(task, oldTail, null);
         tail = newNode;
 
         tasksInHistory.put(task.getId(), newNode);
@@ -75,9 +75,9 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
-    private List<Task> getTasks() {
-        List<Task> tasksInHistoryList = new ArrayList<>();
-        Node<Task> curHead = head;
+    private List<T> getTasks() {
+        List<T> tasksInHistoryList = new ArrayList<>();
+        Node<T> curHead = head;
 
         while (curHead != null) {
             tasksInHistoryList.add(curHead.data);
@@ -87,12 +87,12 @@ public class InMemoryHistoryManager implements HistoryManager {
         return tasksInHistoryList;
     }
 
-    private static class Node<Task> {
-        public Task data;
-        public Node<Task> prev;
-        public Node<Task> next;
+    private static class Node<T> {
+        public T data;
+        public Node<T> prev;
+        public Node<T> next;
 
-        public Node(Task data, Node<Task> prev, Node<Task> next) {
+        public Node(T data, Node<T> prev, Node<T> next) {
             this.data = data;
             this.prev = prev;
             this.next = next;
