@@ -24,7 +24,7 @@ public class KVServer {
 		server.createContext("/load", this::load);
 	}
 
-	private void load(HttpExchange h) throws IOException {
+	private void load(HttpExchange h) throws IOException, NullPointerException {
 		try {
 			System.out.println("\n/load");
 			if (!hasAuth(h)) {
@@ -39,8 +39,7 @@ public class KVServer {
 					h.sendResponseHeaders(400, 0);
 					return;
 				}
-				String value = readText(h);
-				sendText(h, value);
+				sendText(h, data.get(key));
 				System.out.println("Значение для ключа " + key + " успешно отправлено!");
 				h.sendResponseHeaders(200, 0);
 			} else {

@@ -21,7 +21,7 @@ public class Managers {
         return new InMemoryHistoryManager();
     }
 
-    public static HttpTaskManager getDefaultHttp(String key) {
-        return new HttpTaskManager(new KVClient("http://localhost:8078"), key);
+    public static HttpTaskManager getDefaultHttp(KVClient kvClient, String key) {
+        return new HttpTaskManager(kvClient, key);
     }
 }
