@@ -208,7 +208,7 @@ public class InMemoryTaskManager implements TaskManager {
         return allTasksSortedByStartTime;
     }
 
-    protected Map<Integer, Task> getAllTaskTreeMap() {
+    public Map<Integer, Task> getAllTaskTreeMap() {
         final Map<Integer, Task> sortedAllTasks = new TreeMap<>();
 
         sortedAllTasks.putAll(getAllTasks());

@@ -25,7 +25,7 @@ class InMemoryHistoryManagerTest {
     protected Subtask subtask2;
     protected Subtask subtask3;
     protected List<Task> testHistory;
-    protected HistoryManager historyManager;
+    protected HistoryManager<Task> historyManager;
     protected static final DateTimeFormatter formatter = FileBackedTaskManager.LOCAL_DATE_TIME_FORMATTER;
 
     @BeforeEach
