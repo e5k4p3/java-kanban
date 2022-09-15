@@ -105,6 +105,10 @@ public class KVServer {
 		server.start();
 	}
 
+	public void stop(int delay) {
+		server.stop(delay);
+	}
+
 	private String generateApiToken() {
 		return "" + System.currentTimeMillis();
 	}
