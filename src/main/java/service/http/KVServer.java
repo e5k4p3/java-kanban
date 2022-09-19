@@ -12,7 +12,7 @@ import com.sun.net.httpserver.HttpServer;
 
 public class KVServer {
 	public static final int PORT = 8078;
-	private final String apiToken;
+	private final String apiToken; // Как раз этот код нам выдали в задании) Нам тут только нужно было дописать метод load()
 	private final HttpServer server;
 	private final Map<String, String> data = new HashMap<>();
 

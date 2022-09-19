@@ -25,9 +25,11 @@ public class KVClient {
                 .build();
         HttpClient client = HttpClient.newHttpClient();
         HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
-
         try {
-            client.send(request, handler);
+            HttpResponse<String> response = client.send(request, handler);
+            if (response.statusCode() != 200) {
+                throw new ManagerSaveException("Код ответа в методе save(): " + response.statusCode());
+            }
         } catch (IOException | InterruptedException e) {
             throw new ManagerSaveException("Произошла ошибка во время сохранения на сервер.");
         }
@@ -43,6 +45,9 @@ public class KVClient {
 
         try {
             HttpResponse<String> response = client.send(request, handler);
+            if (response.statusCode() != 200) {
+                throw new ManagerSaveException("Код ответа в методе load(): " + response.statusCode());
+            }
             return response.body();
         } catch (IOException | InterruptedException e) {
             throw new ManagerLoadException("Произошла ошибка во время считывания с сервера.");
@@ -58,6 +63,9 @@ public class KVClient {
         HttpResponse.BodyHandler<String> handler = HttpResponse.BodyHandlers.ofString();
         try {
             HttpResponse<String> response = client.send(request, handler);
+            if (response.statusCode() != 200) {
+                throw new ManagerSaveException("Код ответа в методе getApiToken(): " + response.statusCode());
+            }
             return response.body();
         } catch (IOException | InterruptedException e) {
             System.out.println("Произошла ошибка во время получения API токена.");
